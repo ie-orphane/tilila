@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, setLayoutProps, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
@@ -12,6 +12,22 @@ function FieldError({ error }) {
 }
 
 export default function ExpertProfileEdit({ expert }) {
+    setLayoutProps({
+        breadcrumbs: [
+            {
+                title: 'Dashboard',
+                href: '/experts/dashboard',
+            },
+            {
+                title: 'My Profile',
+                href: '#',
+            },
+        ],
+        title: 'Edit My Profile',
+        description:
+            'Update your public profile and keep your expert information accurate.',
+    });
+
     const { data, setData, patch, processing, errors } = useForm({
         name: expert?.name ?? '',
         title: expert?.title ?? '',
@@ -35,19 +51,6 @@ export default function ExpertProfileEdit({ expert }) {
             <Head title="Edit Expert Profile" />
 
             <div className="mx-auto flex w-full max-w-[min(100%,70rem)] flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
-                <div className="border-b border-border/60 pb-5">
-                    <p className="text-sm font-medium text-tgray">
-                        Expert Back Office
-                    </p>
-                    <h1 className="text-2xl font-bold tracking-tight text-tblack">
-                        Edit my profile
-                    </h1>
-                    <p className="mt-1 text-sm text-tgray">
-                        These fields update the expert profile visible on the
-                        website.
-                    </p>
-                </div>
-
                 <form
                     onSubmit={submit}
                     className="space-y-6 rounded-xl border border-border/70 bg-card p-5 shadow-sm sm:p-6"
@@ -195,5 +198,3 @@ export default function ExpertProfileEdit({ expert }) {
         </>
     );
 }
-
-ExpertProfileEdit.layout = (page) => <AppLayout>{page}</AppLayout>;

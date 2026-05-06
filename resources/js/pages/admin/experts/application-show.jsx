@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, setLayoutProps } from '@inertiajs/react';
 import { CheckCircle2, FileText, Globe2, MapPin, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -94,6 +94,26 @@ function statusClass(status) {
 }
 
 export default function AdminExpertApplicationShow({ application }) {
+    setLayoutProps({
+        breadcrumbs: [
+            {
+                title: 'Dashboard',
+                href: '/admin/dashboard',
+            },
+            {
+                title: 'Expert Applications',
+                href: '/admin/expert-applications',
+            },
+            {
+                title: `Request #${application?.id ?? ''}`,
+                href: '#',
+            }
+        ],
+        title: `Expert Application #${application?.id ?? ''}`,
+        description:
+            'Review the details of this expert application and accept or deny it accordingly.',
+    });
+
     const a = application ?? {};
     const [denyOpen, setDenyOpen] = useState(false);
     const [denyNote, setDenyNote] = useState('');
@@ -447,5 +467,3 @@ export default function AdminExpertApplicationShow({ application }) {
         </>
     );
 }
-
-AdminExpertApplicationShow.layout = (page) => <AppLayout>{page}</AppLayout>;

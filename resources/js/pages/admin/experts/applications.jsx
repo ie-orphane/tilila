@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, setLayoutProps } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 
 function statusClass(status) {
@@ -38,6 +37,22 @@ export default function AdminExpertApplicationsIndex({
     filters,
     kpis,
 }) {
+    setLayoutProps({
+        breadcrumbs: [
+            {
+                title: 'Dashboard',
+                href: '/admin/dashboard',
+            },
+            {
+                title: 'Expert Applications',
+                href: '#',
+            },
+        ],
+        title: 'Expertes',
+        description:
+            'Manage applications submitted by experts who want to be listed in the directory.',
+    });
+
     const [search, setSearch] = useState(filters?.search ?? '');
     const [denyModal, setDenyModal] = useState({
         open: false,
@@ -108,7 +123,7 @@ export default function AdminExpertApplicationsIndex({
             <Head title="Expert Applications" />
 
             <div className="mx-auto flex w-full max-w-[min(100%,90rem)] flex-col gap-8 px-4 py-6 sm:gap-10 sm:px-6 sm:py-8 lg:px-10 lg:pb-10">
-                <div className="flex flex-col gap-4 border-b border-border/60 pb-6 sm:pb-8 lg:flex-row lg:items-start lg:justify-between">
+                {/* <div className="flex flex-col gap-4 border-b border-border/60 pb-6 sm:pb-8 lg:flex-row lg:items-start lg:justify-between">
                     <div>
                         <p className="text-sm font-medium text-tgray">
                             Experts Directory
@@ -121,7 +136,7 @@ export default function AdminExpertApplicationsIndex({
                             deny each request.
                         </p>
                     </div>
-                </div>
+                </div> */}
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <div className="rounded-xl border border-border/70 bg-card p-4">
@@ -459,5 +474,3 @@ export default function AdminExpertApplicationsIndex({
         </>
     );
 }
-
-AdminExpertApplicationsIndex.layout = (page) => <AppLayout>{page}</AppLayout>;

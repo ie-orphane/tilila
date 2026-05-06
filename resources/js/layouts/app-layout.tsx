@@ -6,9 +6,13 @@ import type { BreadcrumbItem } from '@/types';
 
 export default function AppLayout({
     breadcrumbs = [],
+    title,
+    description,
     children,
 }: {
     breadcrumbs?: BreadcrumbItem[];
+    title?: string;
+    description?: string;
     children: React.ReactNode;
 }) {
     const page = usePage();
@@ -36,7 +40,11 @@ export default function AppLayout({
     }
 
     return (
-        <AppLayoutTemplate breadcrumbs={breadcrumbs}>
+        <AppLayoutTemplate
+            breadcrumbs={breadcrumbs}
+            title={title}
+            description={description}
+        >
             {children}
         </AppLayoutTemplate>
     );

@@ -1,9 +1,8 @@
 import { Transition } from '@headlessui/react';
-import { Form, Head, setLayoutProps } from '@inertiajs/react';
+import { Form, Head, setLayoutProps, usePage } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
@@ -14,6 +13,7 @@ import { useTranslation } from '@/contexts/TranslationContext';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
 import { edit } from '@/routes/security';
 import { disable, enable } from '@/routes/two-factor';
+import type { TranslationContextValue } from '@/types/translation';
 
 type Props = {
     canManageTwoFactor?: boolean;
@@ -26,7 +26,12 @@ export default function Security({
     requiresConfirmation = false,
     twoFactorEnabled = false,
 }: Props) {
-    const { t } = useTranslation();
+    const { t } = useTranslation() as TranslationContextValue;
+    const { auth } = usePage().props;
+    const dashboardHref =
+        auth?.user?.role === 'expert'
+            ? '/expert/dashboard'
+            : '/admin/dashboard';
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
@@ -47,10 +52,16 @@ export default function Security({
     setLayoutProps({
         breadcrumbs: [
             {
+                title: t('nav.dashboard'),
+                href: dashboardHref,
+            },
+            {
                 title: t('settings.security.breadcrumbTitle'),
                 href: edit(),
             },
         ],
+        title: t('settings.security.headTitle'),
+        description: t('settings.security.updatePasswordDescription'),
     });
 
     useEffect(() => {
@@ -68,14 +79,6 @@ export default function Security({
             <h1 className="sr-only">{t('settings.security.srTitle')}</h1>
 
             <div className="space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('settings.security.updatePasswordTitle')}
-                    description={t(
-                        'settings.security.updatePasswordDescription',
-                    )}
-                />
-
                 <Form
                     {...SecurityController.update.form()}
                     options={{
@@ -187,13 +190,6 @@ export default function Security({
 
             {canManageTwoFactor && (
                 <div className="space-y-6">
-                    <Heading
-                        variant="small"
-                        title={t('settings.security.twoFactorTitle')}
-                        description={t(
-                            'settings.security.twoFactorDescription',
-                        )}
-                    />
                     {twoFactorEnabled ? (
                         <div className="flex flex-col items-start justify-start space-y-4">
                             <p className="text-sm text-muted-foreground">

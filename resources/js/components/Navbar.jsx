@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { home, login, register, dashboard } from '@/routes';
+import { home, login } from '@/routes';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import TransText from '@/components/TransText';
 import { useTranslation } from '@/contexts/TranslationContext';
@@ -115,8 +115,8 @@ export default function Navbar() {
 
     const authButtonClass =
         'inline-flex items-center justify-center rounded-full bg-alpha-blue px-5 py-2 text-sm font-semibold text-beta-blue transition-colors hover:bg-beta-blue hover:text-twhite';
-    const registerButtonClass =
-        'inline-flex items-center justify-center rounded-full bg-beta-blue px-5 py-2 text-sm font-semibold text-twhite transition-colors hover:opacity-90';
+    const dashboardHref =
+        auth?.user?.role === 'expert' ? '/expert/dashboard' : '/admin/dashboard';
 
     return (
         <header
@@ -164,14 +164,22 @@ export default function Navbar() {
                 <div className="ml-auto flex items-center gap-3">
                     <LanguageSwitcher className="hidden md:flex" />
                     {auth?.user ? (
-                        <Link href={dashboard()} className={authButtonClass}>
+                        <Link href={dashboardHref} className={authButtonClass}>
                             <TransText
                                 en="Dashboard"
                                 fr="Tableau de bord"
                                 ar="لوحة التحكم"
                             />
                         </Link>
-                    ) : null}
+                    ) : (
+                        <Link href={login()} className={authButtonClass}>
+                            <TransText
+                                en="Login"
+                                fr="Connexion"
+                                ar="تسجيل الدخول"
+                            />
+                        </Link>
+                    )}
                 </div>
 
                 <div className="ml-auto flex md:hidden">
@@ -241,7 +249,7 @@ export default function Navbar() {
                             <div className="my-2 border-t border-border" />
                             {auth?.user ? (
                                 <Link
-                                    href={dashboard()}
+                                    href={dashboardHref}
                                     className={`${authButtonClass} justify-center`}
                                     onClick={closeMobile}
                                 >
@@ -264,13 +272,6 @@ export default function Navbar() {
                                             ar="تسجيل الدخول"
                                         />
                                     </Link>
-                                    {/* <Link
-                                    href={register()}
-                                    className={`${registerButtonClass} justify-center`}
-                                    onClick={closeMobile}
-                                >
-                                    <TransText en="Register" fr="S’inscrire" ar="إنشاء حساب" />
-                                </Link> */}
                                 </div>
                             )}
                         </nav>

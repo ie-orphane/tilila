@@ -1,6 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, setLayoutProps } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
 
 function getLocaleValue(value) {
     if (!value) {
@@ -19,36 +18,23 @@ function getLocaleValue(value) {
 }
 
 export default function ExpertDashboard({ expert }) {
+    setLayoutProps({
+        breadcrumbs: [
+            {
+                title: 'Dashboard',
+                href: '#',
+            },
+        ],
+        title: `Welcome, ${getLocaleValue(expert?.name) || 'Expert'}`,
+        description:
+            'Update your public profile and keep your expert information accurate.',
+    });
+
     return (
         <>
             <Head title="Expert Dashboard" />
 
             <div className="mx-auto flex w-full max-w-[min(100%,70rem)] flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
-                <div className="flex flex-col gap-3 border-b border-border/60 pb-5 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p className="text-sm font-medium text-tgray">
-                            Expert Back Office
-                        </p>
-                        <h1 className="text-2xl font-bold tracking-tight text-tblack">
-                            Welcome, {getLocaleValue(expert?.name) || 'Expert'}
-                        </h1>
-                        <p className="mt-1 text-sm text-tgray">
-                            Update your public profile and keep your expert
-                            information accurate.
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        <Button asChild>
-                            <Link href="/expert/profile">Edit my profile</Link>
-                        </Button>
-                        <Button asChild variant="outline">
-                            <Link href="/settings/security">
-                                Change password
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
-
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="rounded-xl border border-border/70 bg-card p-4 shadow-sm">
                         <div className="text-xs text-tgray uppercase">
@@ -108,5 +94,3 @@ export default function ExpertDashboard({ expert }) {
         </>
     );
 }
-
-ExpertDashboard.layout = (page) => <AppLayout>{page}</AppLayout>;

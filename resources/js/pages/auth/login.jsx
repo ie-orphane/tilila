@@ -8,11 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { useTranslation } from '@/contexts/TranslationContext';
-import { register as registerRoute } from '@/routes';
 import { store as loginForm } from '@/routes/login';
 import { request } from '@/routes/password';
 
-export default function Login({ status, canResetPassword, canRegister }) {
+export default function Login({ status, canResetPassword }) {
     const { t } = useTranslation();
 
     setLayoutProps({
@@ -114,18 +113,6 @@ export default function Login({ status, canResetPassword, canRegister }) {
                                 </Button>
                             </div>
 
-                            {canRegister && (
-                                <div className="text-center text-sm text-tgray">
-                                    {t('auth.login.noAccount')}{' '}
-                                    <TextLink
-                                        href={registerRoute()}
-                                        tabIndex={5}
-                                        className="font-semibold text-beta-blue decoration-beta-blue/30 hover:text-beta-blue hover:decoration-beta-blue"
-                                    >
-                                        {t('auth.login.signUp')}
-                                    </TextLink>
-                                </div>
-                            )}
                         </>
                     )}
                 </Form>
