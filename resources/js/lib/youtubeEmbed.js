@@ -22,7 +22,7 @@ export function getYoutubeEmbedUrl(raw) {
     }
 
     m = url.match(
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)/,
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/(?:shorts|live)\/)([a-zA-Z0-9_-]+)/,
     );
 
     if (m) {

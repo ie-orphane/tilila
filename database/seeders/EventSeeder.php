@@ -22,8 +22,8 @@ class EventSeeder extends Seeder
                     'fr' => 'Prochain événement',
                     'ar' => 'الفعالية القادمة',
                 ],
-                'dateIso' => '2026-04-12',
-                'dateTimeIso' => '2026-04-12T18:00:00+01:00',
+                'dateIso' => '2026-06-18',
+                'dateTimeIso' => '2026-06-18T18:00:00+01:00',
                 'startTime' => '18:00',
                 'endTime' => '19:30',
                 'tzLabel' => 'GMT+1',
@@ -55,8 +55,8 @@ class EventSeeder extends Seeder
                 'id' => 'webinar-personal-branding-for-experts',
                 'type' => 'webinar',
                 'badge' => ['en' => 'Webinar', 'fr' => 'Webinaire', 'ar' => 'ندوة عبر الإنترنت'],
-                'dateIso' => '2026-04-24',
-                'dateTimeIso' => '2026-04-24T14:00:00+01:00',
+                'dateIso' => '2026-07-08',
+                'dateTimeIso' => '2026-07-08T14:00:00+01:00',
                 'startTime' => '14:00',
                 'endTime' => '15:00',
                 'tzLabel' => 'GMT+1',
@@ -84,8 +84,8 @@ class EventSeeder extends Seeder
                 'id' => 'workshop-speaking-with-impact',
                 'type' => 'workshop',
                 'badge' => ['en' => 'Workshop', 'fr' => 'Atelier', 'ar' => 'ورشة'],
-                'dateIso' => '2026-05-05',
-                'dateTimeIso' => '2026-05-05T08:00:00+01:00',
+                'dateIso' => '2026-09-12',
+                'dateTimeIso' => '2026-09-12T08:00:00+01:00',
                 'startTime' => '08:00',
                 'endTime' => '13:00',
                 'tzLabel' => 'GMT+1',
@@ -233,11 +233,14 @@ class EventSeeder extends Seeder
                 $date = $payload['dateIso'] ?? null;
             }
 
+            $eventDate = $date ? Carbon::parse($date)->endOfDay() : null;
+            $isPast = $eventDate?->isPast() ?? false;
+
             Event::query()->updateOrCreate(
                 ['slug' => $slug],
                 [
                     'type' => $payload['type'] ?? 'other',
-                    'status' => 'upcoming',
+                    'status' => $isPast ? 'finished' : 'upcoming',
                     'visibility' => 'public',
                     'title' => $payload['title'] ?? ['en' => '', 'fr' => '', 'ar' => ''],
                     'location' => $payload['location'] ?? ['en' => '', 'fr' => '', 'ar' => ''],

@@ -716,7 +716,7 @@ export default function EventForm({
                                                 e.target.value,
                                             )
                                         }
-                                        placeholder="https://www.youtube.com/watch?v=… or https://youtu.be/…"
+                                        placeholder="https://www.youtube.com/live/… or watch?v=…"
                                     />
                                     <p className="text-xs text-muted-foreground">
                                         Shown on the public event page while
@@ -724,8 +724,8 @@ export default function EventForm({
                                         <span className="font-semibold text-foreground">
                                             Live
                                         </span>
-                                        . Same formats as replay (watch, shorts,
-                                        youtu.be).
+                                        . Accepts live, watch, shorts, youtu.be,
+                                        or embed URLs.
                                     </p>
                                     <InputError
                                         message={errors.live_video_url}

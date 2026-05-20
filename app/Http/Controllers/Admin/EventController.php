@@ -333,7 +333,7 @@ class EventController extends Controller
         $liveUrl = trim((string) ($validated['live_video_url'] ?? ''));
         if ($liveUrl !== '' && YoutubeVideo::embedUrlFromInput($liveUrl) === null) {
             throw ValidationException::withMessages([
-                'live_video_url' => 'Enter a valid YouTube link (watch URL, youtu.be, or embed).',
+                'live_video_url' => 'Enter a valid YouTube link (watch, live, shorts, youtu.be, or embed).',
             ]);
         }
         $validated['live_video_url'] = $liveUrl === '' ? null : $liveUrl;

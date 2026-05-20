@@ -10,8 +10,11 @@ import { useTranslation } from '@/contexts/TranslationContext';
 import TransText from '@/components/TransText';
 
 function isPastEvent(event) {
-    const ts = new Date(event?.dateTimeIso ?? '').getTime();
-    if (Number.isNaN(ts)) return false;
+    const iso = event?.dateTimeIso ?? event?.dateIso ?? '';
+    const ts = new Date(iso).getTime();
+    if (Number.isNaN(ts)) {
+        return false;
+    }
     return ts < Date.now();
 }
 
@@ -55,7 +58,11 @@ export default function EventsIndex({
     const { t } = useTranslation();
     const { url } = usePage();
     const topPanel = panelFromUrl(url, eventsInitialPanel);
-    const [activeTab, setActiveTab] = useState('upcoming'); // upcoming | past
+    const [activeTab, setActiveTab] = useState(() => {
+        const all = events ?? [];
+        const upcomingCount = all.filter((e) => !isPastEvent(e)).length;
+        return upcomingCount > 0 ? 'upcoming' : 'past';
+    });
     const [selectedDayIso, setSelectedDayIso] = useState(null);
     const [categories, setCategories] = useState({
         awards: true,
@@ -120,9 +127,9 @@ export default function EventsIndex({
             <Head title={t('events.headTitle')} />
 
             <div>
-                <div className="bg-beta-white py-10">
+                <div className="bg-beta-white py-8 sm:py-10">
                     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-                        {/* <header className="mx-auto max-w-3xl text-center">
+                        <header className="mx-auto max-w-3xl text-center">
                             <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
                                 <TransText
                                     en="TILILA EVENTS"
@@ -137,12 +144,12 @@ export default function EventsIndex({
                                     ar="الجوائز وتيليلاب وتيلي توكس والتقويم السنوي."
                                 />
                             </p>
-
-                            <div className="mt-7 inline-flex rounded-full border border-border bg-card p-1 shadow-sm">
+{/* 
+                            <div className="mt-7 inline-flex flex-wrap items-center justify-center gap-1 rounded-full border border-border bg-card p-1 shadow-sm">
                                 <Link
-                                    href="/events"
+                                    href="/events?view=hub"
                                     className={[
-                                        'rounded-full px-5 py-2 text-sm font-semibold transition',
+                                        'inline-block cursor-pointer rounded-full px-5 py-2 text-sm font-semibold transition',
                                         topPanel === 'hub'
                                             ? 'bg-beta-blue text-white'
                                             : 'text-muted-foreground hover:text-foreground',
@@ -153,7 +160,7 @@ export default function EventsIndex({
                                 <Link
                                     href="/events?view=tilitalks"
                                     className={[
-                                        'rounded-full px-5 py-2 text-sm font-semibold transition',
+                                        'inline-block cursor-pointer rounded-full px-5 py-2 text-sm font-semibold transition',
                                         topPanel === 'tilitalks'
                                             ? 'bg-beta-blue text-white'
                                             : 'text-muted-foreground hover:text-foreground',
@@ -168,19 +175,19 @@ export default function EventsIndex({
                                 <Link
                                     href="/events?view=calendar"
                                     className={[
-                                        'rounded-full px-5 py-2 text-sm font-semibold transition',
+                                        'inline-block cursor-pointer rounded-full px-5 py-2 text-sm font-semibold transition',
                                         topPanel === 'calendar'
                                             ? 'bg-beta-blue text-white'
                                             : 'text-muted-foreground hover:text-foreground',
                                     ].join(' ')}
                                 >
                                     <TransText
-                                        en="Calendar"
+                                        en="Agenda"
                                         fr="Agenda"
                                         ar="الأجندة"
                                     />
                                 </Link>
-                            </div>
+                            </div> */}
 
                             {topPanel === 'calendar' ? (
                                 <div className="mt-8 flex justify-center">
@@ -191,7 +198,7 @@ export default function EventsIndex({
                                     />
                                 </div>
                             ) : null}
-                        </header> */}
+                        </header>
                     </div>
                 </div>
 

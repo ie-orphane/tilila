@@ -76,43 +76,35 @@ function LiveIndicator({ locale }) {
     );
 }
 
-function CtaButton({ cta, eventId }) {
-    const { locale, t } = useTranslation();
-    const label =
-        locale === 'ar'
-            ? cta?.label?.ar
-            : locale === 'fr'
-              ? cta?.label?.fr
-              : (cta?.label?.en ?? t('events.actions.view'));
-    const rawHref = cta?.href;
-    const href =
-        rawHref && rawHref !== '#'
-            ? rawHref
-            : eventId
-              ? `/events/${eventId}`
-              : '#';
-    const kind = cta?.kind ?? 'secondary';
+function eventHref(event) {
+    const raw = event?.cta?.href;
+    if (raw && raw !== '#') {
+        return raw;
+    }
 
-    const cls =
-        kind === 'primary'
-            ? 'bg-beta-blue text-white hover:opacity-90'
-            : kind === 'ghost'
-              ? 'bg-background text-beta-blue hover:bg-secondary'
-              : kind === 'muted'
-                ? 'bg-secondary text-secondary-foreground hover:opacity-90'
-                : 'bg-background text-foreground hover:bg-secondary';
+    return event?.id ? `/events/${event.id}` : '#';
+}
 
-    return (
-        <Link
-            href={href}
-            className={[
-                'inline-flex items-center justify-center rounded-md px-4 py-2 text-xs font-semibold shadow-sm ring-1 ring-border',
-                cls,
-            ].join(' ')}
-        >
-            {label}
-        </Link>
-    );
+function ctaLabel(cta, locale, fallback) {
+    return locale === 'ar'
+        ? cta?.label?.ar
+        : locale === 'fr'
+          ? cta?.label?.fr
+          : (cta?.label?.en ?? fallback);
+}
+
+function ctaToneClass(kind) {
+    if (kind === 'primary') {
+        return 'bg-beta-blue text-white group-hover:opacity-90';
+    }
+    if (kind === 'ghost') {
+        return 'bg-background text-beta-blue';
+    }
+    if (kind === 'muted') {
+        return 'bg-secondary text-secondary-foreground';
+    }
+
+    return 'bg-background text-foreground';
 }
 
 export default function EventCard({ event, activeTab }) {
@@ -143,11 +135,14 @@ export default function EventCard({ event, activeTab }) {
     ].filter(Boolean);
 
     const isLive = (event?.status ?? '') === 'live';
+    const href = eventHref(event);
+    const ctaKind = event?.cta?.kind ?? 'secondary';
 
     return (
-        <article
+        <Link
+            href={href}
             className={[
-                'overflow-hidden rounded-2xl bg-card shadow-sm ring-1',
+                'group block overflow-hidden rounded-2xl bg-card shadow-sm ring-1 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-beta-blue',
                 isLive
                     ? 'shadow-md ring-2 shadow-red-500/10 ring-red-500/70'
                     : 'ring-border',
@@ -230,7 +225,7 @@ export default function EventCard({ event, activeTab }) {
                                 </div>
                             </div>
 
-                            <h3 className="mt-3 text-base font-extrabold text-foreground sm:text-lg">
+                            <h3 className="mt-3 text-base font-extrabold text-foreground group-hover:text-beta-blue sm:text-lg">
                                 <TransText
                                     en={event?.title?.en}
                                     fr={event?.title?.fr}
@@ -272,11 +267,22 @@ export default function EventCard({ event, activeTab }) {
                                           : event.categoryLabel.en}
                                 </Badge>
                             ) : null}
-                            <CtaButton cta={event?.cta} eventId={event?.id} />
+                            <span
+                                className={[
+                                    'inline-flex items-center justify-center rounded-md px-4 py-2 text-xs font-semibold shadow-sm ring-1 ring-border',
+                                    ctaToneClass(ctaKind),
+                                ].join(' ')}
+                            >
+                                {ctaLabel(
+                                    event?.cta,
+                                    locale,
+                                    t('events.actions.view'),
+                                )}
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
-        </article>
+        </Link>
     );
 }

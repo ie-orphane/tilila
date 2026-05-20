@@ -27,7 +27,7 @@ export default function QuickAgenda({ items = [] }) {
                         </h2>
                     </div>
                     <Link
-                        href="/events"
+                        href="/events?view=calendar"
                         className="text-sm font-semibold text-beta-blue hover:underline"
                     >
                         <TransText

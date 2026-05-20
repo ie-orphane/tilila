@@ -105,7 +105,7 @@ export default function EventsHub({ eventsByYear = {} }) {
                     <Link
                         key={m.href}
                         href={m.href}
-                        className="group rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-border transition hover:-translate-y-0.5 hover:shadow-md"
+                        className="group flex h-full cursor-pointer flex-col rounded-2xl border border-border bg-card p-6 shadow-sm ring-1 ring-border transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-beta-blue"
                     >
                         <div className="flex h-16 items-center">
                             <img
@@ -208,9 +208,9 @@ export default function EventsHub({ eventsByYear = {} }) {
                             className="rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground shadow-sm hover:bg-muted/40"
                         >
                             <TransText
-                                en="Calendar & registrations →"
-                                fr="Agenda & inscriptions →"
-                                ar="الأجندة والتسجيل →"
+                                en="Open agenda →"
+                                fr="Ouvrir l’agenda →"
+                                ar="افتح الأجندة →"
                             />
                         </Link>
                     </div>
