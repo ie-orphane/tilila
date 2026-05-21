@@ -129,16 +129,21 @@ class NewsletterSubscriptionController extends Controller
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
             'body' => 'required|string|max:50000',
-            'locale' => 'nullable|string|in:all,en,fr,ar',
+            'locales' => 'required|array|min:1',
+            'locales.*' => 'string|in:all,en,fr,ar',
         ]);
 
-        $locale = $validated['locale'] ?? 'all';
+        $locales = array_values(array_unique($validated['locales']));
+        if (in_array('all', $locales, true)) {
+            $locales = ['all'];
+        }
+
         $bodyHtml = nl2br(e($validated['body']));
 
         $query = NewsletterSubscription::query()->orderBy('id');
 
-        if ($locale !== 'all') {
-            $query->where('locale', $locale);
+        if (! in_array('all', $locales, true)) {
+            $query->whereIn('locale', $locales);
         }
 
         $sent = 0;

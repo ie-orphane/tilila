@@ -78,7 +78,6 @@ export default function AdminNewsletterIndex({
                         className="xl:col-span-2"
                     />
                     <NewsletterComposeForm
-                        localeOptions={localeOptions}
                         stats={stats}
                         className="xl:col-span-3"
                     />
@@ -86,10 +85,7 @@ export default function AdminNewsletterIndex({
 
                 <div className="xl:hidden">
                     {activeView === 'compose' ? (
-                        <NewsletterComposeForm
-                            localeOptions={localeOptions}
-                            stats={stats}
-                        />
+                        <NewsletterComposeForm stats={stats} />
                     ) : (
                         <NewsletterSubscribersTable
                             subscribers={subscribers}
