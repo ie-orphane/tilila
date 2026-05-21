@@ -124,7 +124,7 @@ class ExpertApplicationController extends Controller
 
     public function show(ExpertApplication $application): Response
     {
-        $application->load(['reviewedBy:id,name,email', 'expert:id,slug,on_front']);
+        $application->load(['reviewedBy:id,name,email', 'expert:id,on_front']);
 
         return Inertia::render('admin/experts/application-show', [
             'application' => $application,
@@ -215,7 +215,6 @@ class ExpertApplicationController extends Controller
         ];
 
         $topicTags = $this->buildLocalizedTopics($topicsByLocale);
-        $expertiseCards = $this->buildExpertiseCards($topicTags, $bio);
         $languages = is_array($application->languages)
             ? array_values(array_unique(array_filter(array_map(static fn (mixed $item): string => trim((string) $item), $application->languages))))
             : [];
@@ -226,7 +225,7 @@ class ExpertApplicationController extends Controller
         $instagram = trim((string) ($socials['instagram'] ?? ''));
         $portfolio = trim((string) ($socials['portfolio'] ?? ''));
 
-        // Keep compatibility with old profile renderer by ensuring at least one headline tag.
+        // Keep compatibility with the directory UI by ensuring at least one expertise tag.
         if ($topicTags === []) {
             $topicTags = [[
                 'en' => 'Expert',
@@ -235,39 +234,27 @@ class ExpertApplicationController extends Controller
             ]];
         }
 
-        if ($expertiseCards === []) {
-            $expertiseCards = [[
-                'title' => $topicTags[0],
-                'description' => $bio,
-            ]];
-        }
-
         return Expert::query()->create([
             'user_id' => $user->id,
-            'slug' => $this->uniqueSlugFromName($name['en']),
             'name' => $name,
             'title' => $title,
-            'tags' => $topicTags,
+            'bio_i18n' => $bio,
+            'expertise' => $topicTags,
             'city_i18n' => $cityI18n,
+            'region_scope' => $application->region_scope ?: null,
             'country' => $application->country ?: 'Morocco',
             'languages' => $languages,
             'status' => 'published',
             'email' => $application->email,
+            'phone' => $application->phone ?: null,
             'image' => $application->image_path ?: null,
-            'details' => [
-                'bio' => [
-                    $bio,
-                ],
-                'socials' => [
-                    'linkedin' => $linkedin,
-                    'twitter' => $twitter,
-                    'instagram' => $instagram,
-                ],
-                'portfolio_url' => $portfolio,
-                'phone' => (string) ($application->phone ?? ''),
-                'expertise_text' => $expertiseText['en'],
-                'expertise' => $expertiseCards,
+            'socials' => [
+                'linkedin' => $linkedin,
+                'twitter' => $twitter,
+                'instagram' => $instagram,
+                'portfolio' => $portfolio,
             ],
+            'cv_path' => $application->cv_path ?: null,
             'last_activity_at' => now(),
         ]);
     }
@@ -341,33 +328,4 @@ class ExpertApplicationController extends Controller
         return $rows;
     }
 
-    /**
-     * @param  list<array{en: string, fr: string, ar: string}>  $topicTags
-     * @param  array{en: string, fr: string, ar: string}  $bio
-     * @return list<array{title: array{en: string, fr: string, ar: string}, description: array{en: string, fr: string, ar: string}}>
-     */
-    private function buildExpertiseCards(array $topicTags, array $bio): array
-    {
-        return array_map(static fn (array $topic) => [
-            'title' => $topic,
-            'description' => $bio,
-        ], $topicTags);
-    }
-
-    private function uniqueSlugFromName(string $name): string
-    {
-        $base = Str::slug($name);
-        if ($base === '') {
-            $base = 'expert';
-        }
-
-        $slug = $base;
-        $n = 1;
-
-        while (Expert::query()->where('slug', $slug)->exists()) {
-            $slug = $base.'-'.$n++;
-        }
-
-        return $slug;
-    }
 }

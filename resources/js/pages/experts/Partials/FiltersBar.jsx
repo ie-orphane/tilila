@@ -49,6 +49,7 @@ export default function FiltersBar({
     setView,
     locationOptions = [],
     countryOptions = [],
+    regionOptions = [],
     languageOptions = [],
 }) {
     const { t } = useTranslation();
@@ -88,20 +89,23 @@ export default function FiltersBar({
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        <Select
+                            label={<TransText en="Region" fr="Region" ar="المنطقة" />}
+                            value={filters.region}
+                            onChange={(region) =>
+                                setFilters((current) => ({ ...current, region }))
+                            }
+                            options={regionOptions}
+                        />
+
                         <Select
                             label={<TransText en="Country" fr="Pays" ar="البلد" />}
                             value={filters.country}
                             onChange={(country) =>
                                 setFilters((current) => ({ ...current, country }))
                             }
-                            options={[
-                                { value: 'all', label: t('experts.filters.all') },
-                                ...countryOptions.map((option) => ({
-                                    value: option.value,
-                                    label: option.label,
-                                })),
-                            ]}
+                            options={countryOptions}
                         />
 
                         <Select
@@ -116,13 +120,7 @@ export default function FiltersBar({
                             onChange={(location) =>
                                 setFilters((current) => ({ ...current, location }))
                             }
-                            options={[
-                                { value: 'all', label: t('experts.filters.all') },
-                                ...locationOptions.map((location) => ({
-                                    value: location,
-                                    label: location,
-                                })),
-                            ]}
+                            options={locationOptions}
                         />
 
                         <Select
@@ -131,13 +129,7 @@ export default function FiltersBar({
                             onChange={(language) =>
                                 setFilters((current) => ({ ...current, language }))
                             }
-                            options={[
-                                { value: 'all', label: t('experts.filters.all') },
-                                ...languageOptions.map((option) => ({
-                                    value: option.value,
-                                    label: option.label,
-                                })),
-                            ]}
+                            options={languageOptions}
                         />
                     </div>
 

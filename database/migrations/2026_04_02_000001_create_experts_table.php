@@ -10,19 +10,18 @@ return new class extends Migration
     {
         Schema::create('experts', function (Blueprint $table) {
             $table->id();
-            $table->string('slug')->unique();
             $table->json('name');
             $table->json('title');
-            $table->json('tags')->nullable();
-            $table->text('location')->nullable();
+            $table->json('bio_i18n')->nullable();
+            $table->json('expertise')->nullable();
             $table->string('country', 255)->default('Morocco');
-            $table->json('industries')->nullable();
             $table->json('languages')->nullable();
-            $table->string('badge')->nullable();
             $table->string('status')->default('draft');
             $table->string('email')->nullable();
+            $table->string('phone', 64)->nullable();
             $table->string('image')->nullable();
-            $table->json('details')->nullable();
+            $table->json('socials')->nullable();
+            $table->string('cv_path')->nullable();
             $table->timestamp('last_activity_at')->nullable();
             $table->timestamps();
         });

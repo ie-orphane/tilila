@@ -25,6 +25,7 @@ const LANGUAGE_DATASET = [
     { value: 'ar', en: 'Arabic', fr: 'Arabe', ar: 'العربية' },
     { value: 'fr', en: 'French', fr: 'Français', ar: 'الفرنسية' },
     { value: 'en', en: 'English', fr: 'Anglais', ar: 'الإنجليزية' },
+    { value: 'zgh', en: 'Amazigh', fr: 'Amazigh', ar: 'الأمازيغية' },
     { value: 'es', en: 'Spanish', fr: 'Espagnol', ar: 'الإسبانية' },
     { value: 'de', en: 'German', fr: 'Allemand', ar: 'الألمانية' },
     { value: 'it', en: 'Italian', fr: 'Italien', ar: 'الإيطالية' },
@@ -84,6 +85,8 @@ const LANGUAGE_DATASET = [
     { value: 'gl', en: 'Galician', fr: 'Galicien', ar: 'الجاليكية' },
 ];
 
+const PREFERRED_LANGUAGE_ORDER = ['ar', 'fr', 'en', 'zgh', 'es'];
+
 function getDisplayNames(locale, type) {
     try {
         return new Intl.DisplayNames([locale], { type });
@@ -120,5 +123,12 @@ export function buildLanguageOptions(locale = 'en') {
             };
         })
         .filter((item) => item.value && item.label)
-        .sort((a, b) => a.label.localeCompare(b.label));
+        .sort((a, b) => {
+            const aIndex = PREFERRED_LANGUAGE_ORDER.indexOf(a.value);
+            const bIndex = PREFERRED_LANGUAGE_ORDER.indexOf(b.value);
+            if (aIndex !== -1 || bIndex !== -1) {
+                return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+            }
+            return a.label.localeCompare(b.label);
+        });
 }

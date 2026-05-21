@@ -75,17 +75,19 @@ export default function ExpertCard({ expert, view = 'grid' }) {
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-2">
-                    {(expert.tags ?? []).slice(0, isList ? 3 : 2).map((tag) => (
+                    {(expert.expertise ?? [])
+                        .slice(0, isList ? 3 : 2)
+                        .map((tag) => (
                         <span
                             key={tag.en || tag.fr || tag.ar}
                             className="rounded-full border border-border/70 bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground"
                         >
                             <TransText en={tag.en} fr={tag.fr} ar={tag.ar} />
                         </span>
-                    ))}
-                    {(expert.tags ?? []).length > (isList ? 3 : 2) ? (
+                        ))}
+                    {(expert.expertise ?? []).length > (isList ? 3 : 2) ? (
                         <span className="rounded-full border border-border/70 bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground">
-                            +{(expert.tags ?? []).length - (isList ? 3 : 2)}
+                            +{(expert.expertise ?? []).length - (isList ? 3 : 2)}
                         </span>
                     ) : null}
                 </div>

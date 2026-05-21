@@ -12,6 +12,7 @@ class ExpertApplication extends Model
         'name_i18n',
         'email',
         'phone',
+        'region_scope',
         'country',
         'city_i18n',
         'languages',

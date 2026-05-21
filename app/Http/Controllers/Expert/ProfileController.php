@@ -7,6 +7,7 @@ use App\Models\Expert;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -25,16 +26,15 @@ class ProfileController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $expert = $this->resolveExpert($request);
-        $data = $this->validated($request, $expert);
-        $details = $data['details'];
-        unset($data['details']);
+        $data = $this->validated($request);
+        $cvPath = $expert->cv_path;
 
         if ($request->hasFile('cv')) {
-            $existingCvPath = trim((string) ($details['cv_path'] ?? ''));
+            $existingCvPath = trim((string) ($cvPath ?? ''));
             if ($existingCvPath !== '') {
                 Storage::disk('public')->delete($existingCvPath);
             }
-            $details['cv_path'] = $this->storeCvFromUpload($request->file('cv'));
+            $cvPath = $this->storeCvFromUpload($request->file('cv'));
         }
 
         if ($request->hasFile('profile_image')) {
@@ -49,7 +49,7 @@ class ProfileController extends Controller
 
         $expert->update([
             ...$data,
-            'details' => $details,
+            'cv_path' => $cvPath,
             'last_activity_at' => now(),
         ]);
 
@@ -66,26 +66,25 @@ class ProfileController extends Controller
      */
     private function expertToForm(Expert $expert): array
     {
-        $details = is_array($expert->details) ? $expert->details : [];
-        $socials = is_array($details['socials'] ?? null) ? $details['socials'] : [];
+        $socials = is_array($expert->socials) ? $expert->socials : [];
 
         return [
             'id' => $expert->id,
             'name' => $this->triLangValue($expert->name),
             'title' => $this->triLangValue($expert->title),
-            'expertise' => $this->resolveExpertiseForForm($details),
-            'bio' => $this->resolveBioForForm($details),
+            'expertise' => $this->expertiseToForm($expert->expertise),
+            'bio' => $this->triLangValue($expert->bio_i18n),
             'country' => (string) ($expert->country ?? ''),
             'city' => $this->resolveCityForForm($expert),
             'languages' => $expert->languages ?? [],
             'email' => (string) ($expert->email ?? ''),
-            'phone' => trim((string) ($details['phone'] ?? '')),
+            'phone' => trim((string) ($expert->phone ?? '')),
             'linkedin_url' => trim((string) ($socials['linkedin'] ?? '')),
             'twitter_url' => trim((string) ($socials['twitter'] ?? '')),
             'instagram_url' => trim((string) ($socials['instagram'] ?? '')),
-            'portfolio_url' => trim((string) ($details['portfolio_url'] ?? '')),
+            'portfolio_url' => trim((string) ($socials['portfolio'] ?? '')),
             'image_url' => $expert->image_url,
-            'cv_url' => $this->cvUrl($details),
+            'cv_url' => $this->cvUrl($expert->cv_path),
         ];
     }
 
@@ -108,42 +107,9 @@ class ProfileController extends Controller
     }
 
     /**
-     * @param  array<string, mixed>|null  $details
      * @return array<string, mixed>
      */
-    private function normalizeDetailsForForm(?array $details): array
-    {
-        $base = [
-            'bio' => [],
-            'socials' => ['linkedin' => '', 'twitter' => '', 'instagram' => ''],
-            'expertise' => [],
-            'portfolio_url' => '',
-            'phone' => '',
-            'cv_path' => '',
-        ];
-
-        if (! is_array($details)) {
-            return $base;
-        }
-
-        $socials = is_array($details['socials'] ?? null) ? $details['socials'] : [];
-
-        return array_merge($base, $details, [
-            'socials' => [
-                'linkedin' => trim((string) ($socials['linkedin'] ?? '')),
-                'twitter' => trim((string) ($socials['twitter'] ?? '')),
-                'instagram' => trim((string) ($socials['instagram'] ?? '')),
-            ],
-            'portfolio_url' => trim((string) ($details['portfolio_url'] ?? '')),
-            'phone' => trim((string) ($details['phone'] ?? '')),
-            'cv_path' => trim((string) ($details['cv_path'] ?? '')),
-        ]);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function validated(Request $request, Expert $expert): array
+    private function validated(Request $request): array
     {
         $validated = $request->validate([
             'name' => ['required', 'array'],
@@ -201,26 +167,24 @@ class ProfileController extends Controller
         $validated['instagram_url'] = trim((string) ($validated['instagram_url'] ?? ''));
         $validated['portfolio_url'] = trim((string) ($validated['portfolio_url'] ?? ''));
 
-        $details = $this->normalizeDetailsForForm(is_array($expert->details) ? $expert->details : null);
-        $details['phone'] = $validated['phone'];
-        $details['portfolio_url'] = $validated['portfolio_url'];
-        $details['expertise_text'] = $validated['expertise']['en'];
-        $details['bio'] = [$validated['bio']];
-        $details['socials'] = [
+        $validated['bio_i18n'] = $validated['bio'];
+        $validated['expertise'] = $this->buildLocalizedTopics([
+            'en' => $this->extractTopics($validated['expertise']['en']),
+            'fr' => $this->extractTopics($validated['expertise']['fr']),
+            'ar' => $this->extractTopics($validated['expertise']['ar']),
+        ]);
+        $validated['socials'] = [
             'linkedin' => $validated['linkedin_url'],
             'twitter' => $validated['twitter_url'],
             'instagram' => $validated['instagram_url'],
+            'portfolio' => $validated['portfolio_url'],
         ];
 
-        $validated['details'] = $details;
-
         unset(
-            $validated['phone'],
             $validated['portfolio_url'],
             $validated['linkedin_url'],
             $validated['twitter_url'],
             $validated['instagram_url'],
-            $validated['expertise'],
             $validated['bio']
         );
         $validated['city_i18n'] = $validated['city'];
@@ -237,39 +201,9 @@ class ProfileController extends Controller
         return $file->store('experts/cv', 'public');
     }
 
-    /**
-     * @param  array<string, mixed>  $details
-     */
-    private function resolveExpertiseForForm(array $details): array
+    private function cvUrl(?string $path): ?string
     {
-        $fromBio = is_array($details['expertise'] ?? null) ? $details['expertise'] : [];
-        $firstCard = is_array($fromBio[0] ?? null) ? $fromBio[0] : [];
-        $description = is_array($firstCard['description'] ?? null) ? $firstCard['description'] : [];
-
-        return $this->triLangValue([
-            'en' => (string) ($details['expertise_text'] ?? $description['en'] ?? ''),
-            'fr' => (string) ($description['fr'] ?? ''),
-            'ar' => (string) ($description['ar'] ?? ''),
-        ]);
-    }
-
-    /**
-     * @param  array<string, mixed>  $details
-     */
-    private function resolveBioForForm(array $details): array
-    {
-        $bio = is_array($details['bio'] ?? null) ? $details['bio'] : [];
-        $first = is_array($bio[0] ?? null) ? $bio[0] : [];
-
-        return $this->triLangValue($first);
-    }
-
-    /**
-     * @param  array<string, mixed>  $details
-     */
-    private function cvUrl(array $details): ?string
-    {
-        $path = trim((string) ($details['cv_path'] ?? ''));
+        $path = trim((string) ($path ?? ''));
         if ($path === '') {
             return null;
         }
@@ -288,6 +222,82 @@ class ProfileController extends Controller
         }
 
         return $this->triLangValue(['en' => '', 'fr' => '', 'ar' => '']);
+    }
+
+    /**
+     * @param  list<array{en?: string, fr?: string, ar?: string}>|null  $expertise
+     * @return array{en: string, fr: string, ar: string}
+     */
+    private function expertiseToForm(?array $expertise): array
+    {
+        if (! is_array($expertise)) {
+            return $this->triLangValue(['en' => '', 'fr' => '', 'ar' => '']);
+        }
+
+        $values = ['en' => [], 'fr' => [], 'ar' => []];
+        foreach ($expertise as $topic) {
+            if (! is_array($topic)) {
+                continue;
+            }
+            $values['en'][] = trim((string) ($topic['en'] ?? ''));
+            $values['fr'][] = trim((string) ($topic['fr'] ?? ''));
+            $values['ar'][] = trim((string) ($topic['ar'] ?? ''));
+        }
+
+        return [
+            'en' => implode(', ', array_filter($values['en'])),
+            'fr' => implode(', ', array_filter($values['fr'])),
+            'ar' => implode(', ', array_filter($values['ar'])),
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function extractTopics(string $raw): array
+    {
+        $items = preg_split('/[,;\n]+/', $raw) ?: [];
+
+        $topics = [];
+        foreach ($items as $item) {
+            $topic = trim($item);
+            if ($topic === '') {
+                continue;
+            }
+
+            $topics[] = Str::limit($topic, 64, '');
+        }
+
+        return array_values(array_unique(array_slice($topics, 0, 8)));
+    }
+
+    /**
+     * @param  array{en: list<string>, fr: list<string>, ar: list<string>}  $topicsByLocale
+     * @return list<array{en: string, fr: string, ar: string}>
+     */
+    private function buildLocalizedTopics(array $topicsByLocale): array
+    {
+        $rows = [];
+        $max = max(
+            count($topicsByLocale['en']),
+            count($topicsByLocale['fr']),
+            count($topicsByLocale['ar']),
+        );
+
+        for ($i = 0; $i < $max; $i++) {
+            $en = trim((string) ($topicsByLocale['en'][$i] ?? ''));
+            if ($en === '') {
+                continue;
+            }
+
+            $rows[] = [
+                'en' => $en,
+                'fr' => trim((string) ($topicsByLocale['fr'][$i] ?? $en)),
+                'ar' => trim((string) ($topicsByLocale['ar'][$i] ?? $en)),
+            ];
+        }
+
+        return $rows;
     }
 
     /**

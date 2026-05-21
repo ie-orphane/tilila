@@ -51,12 +51,7 @@ class ExpertController extends Controller
     {
         abort_unless($expert->isPublished(), 404);
 
-        $defaults = $this->emptyDetails();
-        $incoming = is_array($expert->details) ? $expert->details : [];
-        $details = array_merge($defaults, $incoming);
-        if (is_array($incoming['socials'] ?? null)) {
-            $details['socials'] = array_merge($defaults['socials'], $incoming['socials']);
-        }
+        $details = $this->detailsFromExpert($expert);
 
         return Inertia::render('experts/[id]', [
             'id' => $expert->id,
@@ -68,16 +63,58 @@ class ExpertController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function emptyDetails(): array
+    private function detailsFromExpert(Expert $expert): array
     {
+        $bio = $this->normalizeTri($expert->bio_i18n);
+        $socials = is_array($expert->socials) ? $expert->socials : [];
+        $expertise = is_array($expert->expertise) ? $expert->expertise : [];
+
         return [
-            'bio' => [],
-            'socials' => [
+            'bio' => $bio === null ? [] : [$bio],
+            'socials' => array_merge([
                 'linkedin' => '',
                 'twitter' => '',
                 'instagram' => '',
-            ],
-            'expertise' => [],
+                'portfolio' => '',
+            ], $socials),
+            'expertise' => array_values(array_filter(array_map(
+                fn (mixed $topic): ?array => $this->expertiseItemFromTopic($topic),
+                $expertise,
+            ))),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $value
+     * @return array{en: string, fr: string, ar: string}|null
+     */
+    private function normalizeTri(?array $value): ?array
+    {
+        if (! is_array($value)) {
+            return null;
+        }
+
+        return [
+            'en' => trim((string) ($value['en'] ?? '')),
+            'fr' => trim((string) ($value['fr'] ?? '')),
+            'ar' => trim((string) ($value['ar'] ?? '')),
+        ];
+    }
+
+    /**
+     * @return array{title: array{en: string, fr: string, ar: string}}|null
+     */
+    private function expertiseItemFromTopic(mixed $topic): ?array
+    {
+        $tri = is_array($topic) ? $this->normalizeTri($topic) : null;
+        if ($tri === null) {
+            return null;
+        }
+
+        if ($tri['en'] === '' && $tri['fr'] === '' && $tri['ar'] === '') {
+            return null;
+        }
+
+        return ['title' => $tri];
     }
 }
