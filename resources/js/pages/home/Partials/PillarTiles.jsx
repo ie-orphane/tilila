@@ -1,8 +1,7 @@
 import React from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import TransText from '@/components/TransText';
 import { useTranslation } from '@/contexts/TranslationContext';
-import { HERO_CAROUSEL_SLIDES } from '@/data/hero-carousel-data';
 import { cn } from '@/lib/utils';
 
 /** Hero slide keys used for pillar imagery (Learn uses Tililab creative visual). */
@@ -61,9 +60,9 @@ function pickAlt(altObj, locale) {
     );
 }
 
-function getPillarVisual(href) {
+function getPillarVisual(href, slides) {
     const key = PILLAR_SLIDE_KEY[href];
-    const slide = HERO_CAROUSEL_SLIDES.find((s) => s.key === key);
+    const slide = (slides ?? []).find((s) => s.key === key);
     return {
         src: slide?.imageSrc ?? '/assets/hero.png',
         imageAlt: slide?.imageAlt,
@@ -72,6 +71,7 @@ function getPillarVisual(href) {
 
 export default function PillarTiles() {
     const { locale } = useTranslation();
+    const slides = usePage().props.hero_slides ?? [];
 
     return (
         <section className="bg-background">
@@ -95,7 +95,7 @@ export default function PillarTiles() {
 
                 <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     {PILLARS.map((p) => {
-                        const { src, imageAlt } = getPillarVisual(p.href);
+                        const { src, imageAlt } = getPillarVisual(p.href, slides);
                         const alt = pickAlt(imageAlt, locale);
 
                         return (

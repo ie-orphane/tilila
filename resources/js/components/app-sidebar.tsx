@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     Calendar,
+    Images,
     LayoutGrid,
     Megaphone,
     Newspaper,
@@ -210,6 +211,18 @@ export function AppSidebar() {
                                         title: 'Participants',
                                         href: '/admin/tililab/participants',
                                         icon: Users,
+                                    },
+                                ]}
+                            />
+                        </SidebarGroup>
+                        <SidebarGroup className="mt-4 py-0">
+                            <SidebarGroupLabel>Contenu</SidebarGroupLabel>
+                            <SidebarNavLinks
+                                items={[
+                                    {
+                                        title: 'Hero Carousel',
+                                        href: '/admin/hero-slides',
+                                        icon: Images,
                                     },
                                 ]}
                             />

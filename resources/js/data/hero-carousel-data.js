@@ -1,4 +1,12 @@
 /**
+ * @deprecated
+ * This file is the seeder source of truth for the hero_slides DB table.
+ * It is no longer imported by HeroCarousel.jsx — slides are now served via
+ * the Inertia shared prop `hero_slides` from HandleInertiaRequests.
+ *
+ * DO NOT DELETE until the HeroSlideSeeder has been confirmed to have run
+ * successfully in production. After that, remove in a follow-up cleanup PR.
+ *
  * Site-wide hero carousel: one slide per main nav section.
  * Each slide: full-bleed background image + overlay copy/CTAs (see HeroCarousel.jsx).
  * imageContain: true for logos or artwork that should not be cropped.

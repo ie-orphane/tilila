@@ -2,52 +2,39 @@ import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import TransText from '@/components/TransText';
 import { useTranslation } from '@/contexts/TranslationContext';
-import { HERO_CAROUSEL_SLIDES } from '@/data/hero-carousel-data';
 import { cn } from '@/lib/utils';
 
 const AUTOPLAY_MS = 6500;
 
-const PATH_PREFIX_TO_SLIDE_KEY = [
-    ['/gouvernance', 'gouvernance'],
-    ['/tililab', 'tililab'],
-    ['/tilila', 'tilila'],
-    ['/experts', 'experts'],
-    ['/events', 'events'],
-    ['/opportunities', 'opportunities'],
-    ['/media', 'media'],
-    ['/about', 'about'],
-    ['/', 'home'],
-];
 
 export function isHomeHeroPath(pathname) {
     const path = (pathname || '/').replace(/\/$/, '') || '/';
     return path === '/';
 }
 
-export function getSlideForPath(pathname) {
+export function getSlideForPath(pathname, slides) {
     const path = (pathname || '/').replace(/\/$/, '') || '/';
 
-    for (const [prefix, slideKey] of PATH_PREFIX_TO_SLIDE_KEY) {
-        if (path === prefix || path.startsWith(`${prefix}/`)) {
-            return (
-                HERO_CAROUSEL_SLIDES.find((slide) => slide.key === slideKey) ??
-                null
-            );
-        }
-    }
-
-    return null;
+    return (
+        (slides ?? []).find((slide) => {
+            const prefix = slide.pathPrefix;
+            if (!prefix) return false;
+            const norm = prefix.replace(/\/$/, '') || '/';
+            if (norm === '/') return path === '/';
+            return path === norm || path.startsWith(`${norm}/`);
+        }) ?? null
+    );
 }
 
 /** @deprecated Use getSlideForPath — kept for any existing imports */
-export function getInitialSlideIndex(pathname) {
-    const slide = getSlideForPath(pathname);
+export function getInitialSlideIndex(pathname, slides) {
+    const slide = getSlideForPath(pathname, slides);
     if (!slide) return 0;
-    const index = HERO_CAROUSEL_SLIDES.findIndex((s) => s.key === slide.key);
+    const index = (slides ?? []).findIndex((s) => s.key === slide.key);
     return index >= 0 ? index : 0;
 }
 
-export function shouldShowHeroCarousel(pathname) {
+export function shouldShowHeroCarousel(pathname, slides) {
     const path = pathname || '/';
 
     if (
@@ -74,7 +61,7 @@ export function shouldShowHeroCarousel(pathname) {
         return false;
     }
 
-    return getSlideForPath(path) !== null;
+    return getSlideForPath(path, slides) !== null;
 }
 
 function pickLocalizedTriple(obj, locale) {
@@ -113,10 +100,40 @@ function heroImageClasses(slide) {
     );
 }
 
+function CtaButtons({ ctas, isActive }) {
+    const activeCtas = (ctas ?? []).filter((c) => c.is_active !== false);
+    if (!activeCtas.length) return null;
+
+    return (
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+            {activeCtas.map((cta, i) => {
+                const isPrimary = cta.style === 'primary';
+                return (
+                    <Link
+                        key={i}
+                        href={cta.url ?? '#'}
+                        tabIndex={isActive !== undefined ? (isActive ? 0 : -1) : undefined}
+                        className={
+                            isPrimary
+                                ? 'inline-flex w-full items-center justify-center rounded-xl bg-beta-blue px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-tblack/30 transition hover:bg-beta-blue/90 sm:w-auto'
+                                : 'inline-flex w-full items-center justify-center rounded-xl border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 sm:w-auto'
+                        }
+                    >
+                        <TransText
+                            en={cta.label?.en ?? ''}
+                            fr={cta.label?.fr ?? ''}
+                            ar={cta.label?.ar ?? ''}
+                        />
+                    </Link>
+                );
+            })}
+        </div>
+    );
+}
+
 function HeroSlideLayer({ slide, isActive, locale }) {
     const imageContain = Boolean(slide?.imageContain);
     const imageBg = slide?.imageBg === 'white' ? 'bg-white' : 'bg-tblack';
-    const hasSecondary = Boolean(slide?.secondaryCta && slide?.secondaryHref);
 
     return (
         <div
@@ -156,17 +173,17 @@ function HeroSlideLayer({ slide, isActive, locale }) {
                 aria-hidden
             />
 
-            <div className="absolute inset-0 flex flex-col justify-end">
-                <div className="mx-auto w-full max-w-[min(100%,1920px)] px-5 pt-24 pb-16 sm:px-8 sm:pb-20 lg:px-12 lg:pb-24">
+            <div className="absolute  inset-0 flex flex-col justify-end ">
+                <div className="mx-auto w-full max-w-[min(100%,1920px)] px-5  pt-24 pb-16 sm:px-8 sm:pb-20 lg:px-12 lg:pb-24">
                     <div
                         className={cn(
-                            'max-w-2xl transition-all duration-700 ease-out motion-reduce:transition-none',
+                            'max-w-2xl transition-all duration-700 ease-out  motion-reduce:transition-none',
                             isActive
                                 ? 'translate-y-0 opacity-100'
                                 : 'translate-y-3 opacity-0',
                         )}
                     >
-                        <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-5 sm:gap-3">
+                        <div className="mb-4 flex flex-wrap  items-center gap-2 sm:mb-5 sm:gap-3">
                             {slide?.cardKicker ? (
                                 <TransText
                                     tag="p"
@@ -228,34 +245,7 @@ function HeroSlideLayer({ slide, isActive, locale }) {
                             </p>
                         ) : null}
 
-                        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-                            {slide?.primaryCta && slide?.primaryHref ? (
-                                <Link
-                                    href={slide.primaryHref}
-                                    tabIndex={isActive ? 0 : -1}
-                                    className="inline-flex w-full items-center justify-center rounded-xl bg-beta-blue px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-tblack/30 transition hover:bg-beta-blue/90 sm:w-auto"
-                                >
-                                    <TransText
-                                        en={slide.primaryCta.en}
-                                        fr={slide.primaryCta.fr}
-                                        ar={slide.primaryCta.ar}
-                                    />
-                                </Link>
-                            ) : null}
-                            {hasSecondary ? (
-                                <Link
-                                    href={slide.secondaryHref}
-                                    tabIndex={isActive ? 0 : -1}
-                                    className="inline-flex w-full items-center justify-center rounded-xl border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 sm:w-auto"
-                                >
-                                    <TransText
-                                        en={slide.secondaryCta.en}
-                                        fr={slide.secondaryCta.fr}
-                                        ar={slide.secondaryCta.ar}
-                                    />
-                                </Link>
-                            ) : null}
-                        </div>
+                        <CtaButtons ctas={slide?.ctas} isActive={isActive} />
                     </div>
                 </div>
             </div>
@@ -270,7 +260,6 @@ function PageHeroBanner({ slide, locale }) {
         : slide?.imageBg === 'white'
           ? 'bg-white'
           : 'bg-tblack';
-    const hasSecondary = Boolean(slide?.secondaryCta && slide?.secondaryHref);
     const showHeadline =
         !isBanner &&
         Boolean(
@@ -303,32 +292,7 @@ function PageHeroBanner({ slide, locale }) {
                     aria-hidden
                 />
                 <div className="absolute inset-x-0 bottom-0 flex justify-end px-5 pb-5 sm:px-8 sm:pb-6 lg:px-12">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                        {slide?.primaryCta && slide?.primaryHref ? (
-                            <Link
-                                href={slide.primaryHref}
-                                className="inline-flex w-full items-center justify-center rounded-xl bg-beta-blue px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-tblack/30 transition hover:bg-beta-blue/90 sm:w-auto"
-                            >
-                                <TransText
-                                    en={slide.primaryCta.en}
-                                    fr={slide.primaryCta.fr}
-                                    ar={slide.primaryCta.ar}
-                                />
-                            </Link>
-                        ) : null}
-                        {hasSecondary ? (
-                            <Link
-                                href={slide.secondaryHref}
-                                className="inline-flex w-full items-center justify-center rounded-xl border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 sm:w-auto"
-                            >
-                                <TransText
-                                    en={slide.secondaryCta.en}
-                                    fr={slide.secondaryCta.fr}
-                                    ar={slide.secondaryCta.ar}
-                                />
-                            </Link>
-                        ) : null}
-                    </div>
+                    <CtaButtons ctas={slide?.ctas} />
                 </div>
             </div>
         );
@@ -435,32 +399,7 @@ function PageHeroBanner({ slide, locale }) {
                             ) : null}
                         </>
 
-                        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-                            {slide?.primaryCta && slide?.primaryHref ? (
-                                <Link
-                                    href={slide.primaryHref}
-                                    className="inline-flex w-full items-center justify-center rounded-xl bg-beta-blue px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-tblack/30 transition hover:bg-beta-blue/90 sm:w-auto"
-                                >
-                                    <TransText
-                                        en={slide.primaryCta.en}
-                                        fr={slide.primaryCta.fr}
-                                        ar={slide.primaryCta.ar}
-                                    />
-                                </Link>
-                            ) : null}
-                            {hasSecondary ? (
-                                <Link
-                                    href={slide.secondaryHref}
-                                    className="inline-flex w-full items-center justify-center rounded-xl border border-white/35 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 sm:w-auto"
-                                >
-                                    <TransText
-                                        en={slide.secondaryCta.en}
-                                        fr={slide.secondaryCta.fr}
-                                        ar={slide.secondaryCta.ar}
-                                    />
-                                </Link>
-                            ) : null}
-                        </div>
+                        <CtaButtons ctas={slide?.ctas} />
                     </div>
                 </div>
             </div>
@@ -468,8 +407,7 @@ function PageHeroBanner({ slide, locale }) {
     );
 }
 
-function HomeHeroCarousel({ locale }) {
-    const slides = HERO_CAROUSEL_SLIDES;
+function HomeHeroCarousel({ slides, locale }) {
     const slideCount = slides?.length ?? 0;
     const [activeIndex, setActiveIndex] = React.useState(0);
     const [paused, setPaused] = React.useState(false);
@@ -581,7 +519,9 @@ function HomeHeroCarousel({ locale }) {
 
 export default function HeroCarousel() {
     const { locale } = useTranslation();
-    const { url } = usePage();
+    const { url, props } = usePage();
+    const slides = props.hero_slides ?? [];
+
     const pathname = new URL(
         url,
         typeof window !== 'undefined'
@@ -592,9 +532,11 @@ export default function HeroCarousel() {
     const isHome = isHomeHeroPath(pathname);
 
     if (isHome) {
+        if (!slides.length) return null;
+
         return (
             <section className="relative bg-background" aria-label="Home hero">
-                <HomeHeroCarousel locale={locale} />
+                <HomeHeroCarousel slides={slides} locale={locale} />
                 <style>{`
                     @keyframes hero-ken-burns {
                         from { transform: scale(1); }
@@ -605,7 +547,7 @@ export default function HeroCarousel() {
         );
     }
 
-    const slide = getSlideForPath(pathname);
+    const slide = getSlideForPath(pathname, slides);
 
     if (!slide) return null;
 

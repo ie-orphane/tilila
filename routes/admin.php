@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\TililabEditionController;
 use App\Http\Controllers\Admin\TililabParticipantController;
 use App\Http\Controllers\Admin\TililaConnectRequestController;
 use App\Http\Controllers\Admin\TililaContestParticipantController;
+use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\TililaEditionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -61,6 +62,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('tililab/editions', TililabEditionController::class)
         ->except(['show'])
         ->names('tililab.editions');
+
+    Route::post('hero-slides/reorder', [HeroSlideController::class, 'reorder'])->name('hero-slides.reorder');
+    Route::patch('hero-slides/{heroSlide}/toggle', [HeroSlideController::class, 'toggle'])->name('hero-slides.toggle');
+    Route::resource('hero-slides', HeroSlideController::class)->except(['show']);
 
     Route::get('tilila/participants/export.csv', [TililaContestParticipantController::class, 'exportCsv'])
         ->name('tilila.participants.export');

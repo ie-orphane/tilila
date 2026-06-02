@@ -33,7 +33,8 @@ export default function AppLayout({
         (isSettingsPage && (role === 'admin' || role === 'expert'));
 
     if (!isBackOfficePage) {
-        const showHero = shouldShowHeroCarousel(currentPath);
+        const slides = (page.props.hero_slides as unknown[]) ?? [];
+        const showHero = shouldShowHeroCarousel(currentPath, slides);
 
         return (
             <div className="flex min-h-screen flex-col bg-background">
