@@ -106,7 +106,7 @@ export default function Footer() {
                                     />
                                 </Link>
                             </li>
-                            <li>
+                            {/* <li>
                                 <Link
                                     href="/experts"
                                     className="transition-colors hover:text-tblack"
@@ -137,7 +137,7 @@ export default function Footer() {
                                         ar="خريطة الموقع"
                                     />
                                 </Link>
-                            </li>
+                            </li> */}
                             <li>
                                 <Link
                                     href="/mentions-legales"

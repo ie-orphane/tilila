@@ -70,4 +70,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('tilila.participants.show');
     Route::delete('tilila/participants/{participant}', [TililaContestParticipantController::class, 'destroy'])
         ->name('tilila.participants.destroy');
+
+    require __DIR__.'/newsletter.php';
 });

@@ -25,7 +25,10 @@ function Card({ title, body, href, cta }) {
 
 export default function AboutOverviewSection() {
     return (
-        <section className="mx-auto max-w-7xl px-4 pb-14 pt-4">
+        <section
+            id="overview"
+            className="scroll-mt-16 mx-auto max-w-7xl px-4 pb-14 pt-4"
+        >
             <div className="mx-auto max-w-3xl text-center">
                 <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
                     <TransText

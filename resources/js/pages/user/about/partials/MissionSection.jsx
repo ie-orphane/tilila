@@ -32,7 +32,10 @@ export default function MissionSection() {
               : 'Professional meeting about media and communication';
 
     return (
-        <section className="mx-auto max-w-7xl px-4 py-10">
+        <section
+            id="mission"
+            className="scroll-mt-16 mx-auto max-w-7xl px-4 py-10"
+        >
             <div className="grid items-center gap-10 lg:grid-cols-12">
                 <div className="lg:col-span-6">
                     <div className="overflow-hidden rounded-2xl border border-border bg-secondary">

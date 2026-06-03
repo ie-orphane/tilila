@@ -4,7 +4,10 @@ import TransText from '@/components/TransText';
 
 export default function TililabCtaSection() {
     return (
-        <section className="mx-auto max-w-7xl px-4 py-14">
+        <section
+            id="tililab"
+            className="scroll-mt-16 mx-auto max-w-7xl px-4 py-14"
+        >
             <div className="overflow-hidden rounded-3xl border border-border bg-alpha-blue">
                 <div className="grid gap-10 p-8 sm:p-12 lg:grid-cols-12 lg:items-center">
                     <div className="lg:col-span-7">

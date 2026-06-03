@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import AboutOverviewSection from '@/pages/user/about/partials/AboutOverviewSection';
 import CommitteeSection from '@/pages/user/about/partials/CommitteeSection';
@@ -9,7 +10,23 @@ import TililabCtaSection from '@/pages/user/about/partials/TililabCtaSection';
 import ExpandedSections from '@/pages/user/about/partials/ExpandedSections';
 import { useTranslation } from '@/contexts/TranslationContext';
 
+function scrollToHashSection() {
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) {
+        return;
+    }
+
+    const target = document.getElementById(hash);
+    if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
 export default function About() {
+    useEffect(() => {
+        scrollToHashSection();
+    }, []);
+
     return (
         <>
             <AboutHead />

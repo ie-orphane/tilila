@@ -29,7 +29,10 @@ const committee = [
 
 export default function CommitteeSection() {
     return (
-        <section className="mx-auto max-w-7xl px-4 py-12">
+        <section
+            id="committee"
+            className="scroll-mt-16 mx-auto max-w-7xl px-4 py-12"
+        >
             <div className="text-center">
                 <div className="text-xs font-semibold tracking-widest text-tgray">
                     <TransText

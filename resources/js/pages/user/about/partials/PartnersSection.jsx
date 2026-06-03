@@ -35,7 +35,10 @@ const mediaPartners = [
 
 export default function PartnersSection() {
     return (
-        <section className="mx-auto max-w-7xl px-4 py-12">
+        <section
+            id="partners"
+            className="scroll-mt-16 mx-auto max-w-7xl px-4 py-12"
+        >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <div className="text-xs font-semibold tracking-widest text-tgray">
